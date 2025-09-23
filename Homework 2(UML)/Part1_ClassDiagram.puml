@@ -1,0 +1,52 @@
+@startuml Part1_ClassDiagram
+skinparam classAttributeIconSize 0
+
+abstract class Employee {
+  - firstName : String
+  - lastName : String
+  - socialSecurityNumber : String
+  + getFirstName() : String
+  + getLastName() : String
+  + getSocialSecurityNumber() : String
+  + setFirstName(firstName : String) : void
+  + setLastName(lastName : String) : void
+  + setSocialSecurityNumber(ssn : String) : void
+  + toString() : String
+}
+
+class BaseEmployee extends Employee {
+  - baseSalary : int
+  + getBaseSalary() : int
+  + setBaseSalary(baseSalary : int) : void
+}
+
+class HourlyEmployee extends Employee {
+  - wage : int
+  - hoursWorked : int
+  + getWage() : int
+  + setWage(wage : int) : void
+  + getHoursWorked() : int
+  + setHoursWorked(hours : int) : void
+}
+
+class SalariedEmployee extends Employee {
+  - weeklySalary : double
+  + SalariedEmployee(firstName : String, lastName : String, ssn : String, weeklySalary : double)
+  + getWeeklySalary() : double
+  + setWeeklySalary(weeklySalary : double) : void
+}
+
+class CommisionEmployee extends Employee {
+  - commissionRate : int
+  - grossSales : int
+  + getCommissionRate() : int
+  + setCommissionRate(rate : int) : void
+  + getGrossSales() : int
+  + setGrossSales(sales : int) : void
+}
+
+Employee <|-- BaseEmployee
+Employee <|-- HourlyEmployee
+Employee <|-- SalariedEmployee
+Employee <|-- CommisionEmployee
+@enduml

@@ -1,0 +1,36 @@
+@startuml Part4_ClassDiagram
+skinparam classAttributeIconSize 0
+
+class Course {
+  - name : String
+  - instructors : ArrayList<Instructor>
+  - textbooks : ArrayList<Textbook>
+  + setName(name : String) : void
+  + getInstructors() : ArrayList<Instructor>
+  + setInstructor(instructor : Instructor) : void
+  + getTextbooks() : ArrayList<Textbook>
+  + setTextbook(textbook : Textbook) : void
+  + printCourse() : void
+}
+
+class Instructor {
+  - firstName : String
+  - lastName : String
+  - officeNumber : String
+  + setFirstName(firstName : String) : void
+  + setLastName(lastName : String) : void
+  + setOfficeNumber(office : String) : void
+}
+
+class Textbook {
+  - title : String
+  - author : String
+  - publisher : String
+  + setTitle(title : String) : void
+  + setAuthor(author : String) : void
+  + setPublisher(publisher : String) : void
+}
+
+Course o-- "0..*" Instructor : instructors
+Course o-- "0..*" Textbook : textbooks
+@enduml

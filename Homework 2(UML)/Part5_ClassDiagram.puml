@@ -1,0 +1,26 @@
+@startuml Part5_ClassDiagram
+skinparam classAttributeIconSize 0
+
+class Folder {
+  - name : String
+  - subfolders : ArrayList<Folder>
+  - files : ArrayList<File>
+  + setName(name : String) : void
+  + addSubfolder(subFolderName : String) : void
+  + getSubfolder(subFolderName : String) : Folder
+  + removeSubfolder(subFolderName : String) : void
+  + addFile(fileName : String) : void
+  + removeFile(file : File) : boolean
+  + printFolderContents() : void
+}
+
+class File {
+  - name : String
+  + File(name : String)
+  + getName() : String
+  + setName(name : String) : void
+}
+
+Folder *-- "0..*" Folder : subfolders
+Folder *-- "0..*" File : files
+@enduml

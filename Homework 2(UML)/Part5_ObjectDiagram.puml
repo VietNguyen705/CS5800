@@ -1,0 +1,51 @@
+@startuml Part5_ObjectDiagram
+object "phpDemo1:Folder" as pd {
+  name = "php_demo1"
+}
+
+object "Source Files:Folder" as sf {
+  name = "Source Files"
+}
+
+object "Include Path:Folder" as ip {
+  name = "Include Path"
+}
+
+object "Remote Files:Folder" as rf {
+  name = "Remote Files"
+}
+
+object ".phalcon:Folder" as ph {
+  name = ".phalcon"
+}
+
+object "cache:Folder" as ca {
+  name = "cache"
+}
+
+object "public:Folder" as pu {
+  name = "public"
+}
+
+object ".htaccess:File" as ha {
+  name = ".htaccess"
+}
+
+object ".htrouter.php:File" as hp {
+  name = ".htrouter.php"
+}
+
+object "index.html:File" as ih {
+  name = "index.html"
+}
+
+pd -- sf : subfolder
+pd -- ip : subfolder
+pd -- rf : subfolder
+sf -- ph : subfolder
+sf -- ca : subfolder
+sf -- pu : subfolder
+pu -- ha : file
+pu -- hp : file
+pu -- ih : file
+@enduml

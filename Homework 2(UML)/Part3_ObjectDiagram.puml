@@ -1,0 +1,26 @@
+@startuml Part3_ObjectDiagram
+object "shipsArray:Ship[]" as sa {
+  length = 3
+}
+
+object "shipTitanic:Ship" as st {
+  shipName = "Titanic"
+  yearBuilt = "March31st,1909"
+}
+
+object "cruiseGemini:CruiseShip" as cg {
+  shipName = "MVGemini"
+  yearBuilt = "May30th,1991"
+  maxNumberPassengers = 100
+}
+
+object "cargoEverGiven:CargoShip" as ce {
+  shipName = "EverGiven"
+  yearBuilt = "September25th,2018"
+  cargoCapacityInTonnage = 220940
+}
+
+sa -- st : element[0]
+sa -- cg : element[1]
+sa -- ce : element[2]
+@enduml

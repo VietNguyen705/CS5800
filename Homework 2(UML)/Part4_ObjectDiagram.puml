@@ -1,0 +1,30 @@
+@startuml Part4_ObjectDiagram
+object "c1:Course" as c1c {
+  name = "CS5800 - Advanced Software Engineering"
+  instructors = [c1Instructor]
+  textbooks = [c1Textbook]
+}
+
+object "c2:Course" as c2c {
+  name = "CS6000-Duality"
+  instructors = [c1Instructor]
+  textbooks = [c1Textbook]
+}
+
+object "c1Instructor:Instructor" as i1 {
+  firstName = "Nima"
+  lastName = "Davarpanah"
+  officeNumber = "3-2636"
+}
+
+object "c1Textbook:Textbook" as t1 {
+  title = "CleanCode:A Handbook of Agile Software Craftsmanship"
+  author = "Robert Cecil Martin"
+  publisher = "Pearson"
+}
+
+c1c -- i1 : instructors
+c1c -- t1 : textbooks
+c2c -- i1 : instructors
+c2c -- t1 : textbooks
+@enduml
