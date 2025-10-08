@@ -1,0 +1,60 @@
+@startuml Sequence_Create_Note
+title Sequence Diagram - Create Note with Auto-Organization (UC1 + UC3)
+
+actor User
+participant "UI" as UI
+participant "Note" as Note
+participant "NoteRepository" as NoteRepo
+participant "AIOrganizer" as AI
+participant "Tag" as Tag
+
+User -> UI: Click "Create Note"
+activate UI
+
+UI -> User: Display note form
+User -> UI: Enter title, body, content
+User -> UI: Click "Save"
+
+UI -> Note: create(title, body, content)
+activate Note
+
+Note -> Note: Initialize properties\n(timestamps, userId)
+
+Note -> NoteRepo: save(note)
+activate NoteRepo
+NoteRepo -> NoteRepo: Persist to database
+NoteRepo --> Note: noteId
+deactivate NoteRepo
+
+Note -> AI: suggestTags(note)
+activate AI
+AI -> AI: analyzeContent(text)
+AI -> AI: Extract keywords\nand categories
+AI --> Note: List<Tag>
+deactivate AI
+
+loop for each suggested tag
+  Note -> Tag: attachToNote(note)
+  activate Tag
+  Tag -> NoteRepo: updateNoteTags(noteId, tagId)
+  activate NoteRepo
+  NoteRepo --> Tag: success
+  deactivate NoteRepo
+  Tag --> Note: attached
+  deactivate Tag
+end
+
+Note -> NoteRepo: update(note)
+activate NoteRepo
+NoteRepo --> Note: updated note
+deactivate NoteRepo
+
+Note --> UI: Note created successfully
+deactivate Note
+
+UI -> UI: Refresh note board
+UI --> User: Display success message\nand show new note
+
+deactivate UI
+
+@enduml

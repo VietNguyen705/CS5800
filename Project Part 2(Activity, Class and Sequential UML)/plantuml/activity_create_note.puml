@@ -1,0 +1,43 @@
+@startuml Activity_Create_Note
+title Activity Diagram - Create Note (UC1)
+
+start
+
+:User opens app;
+
+:Click "Create Note" button;
+
+:Enter note details;
+note right
+  - Title
+  - Body text
+  - Optional: checklist items
+  - Optional: images
+  - Optional: voice recording
+end note
+
+:Click "Save" button;
+
+partition "Auto-Organization (UC3)" {
+  :AIOrganizer analyzes content;
+
+  :Extract keywords and context;
+
+  :Generate suggested tags;
+
+  if (Tags found?) then (yes)
+    :Apply tags to note;
+  else (no)
+    :Apply default category;
+  endif
+}
+
+:NoteRepository persists note;
+
+:Update note board view;
+
+:Display success notification;
+
+stop
+
+@enduml

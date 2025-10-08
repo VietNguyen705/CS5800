@@ -1,0 +1,209 @@
+@startuml Class_Diagram
+title Class Diagram - AI-Enhanced Notes App
+
+' Entity Classes
+class User {
+  - userId: String
+  - username: String
+  - email: String
+  - preferences: Map<String, Object>
+  - createdAt: DateTime
+  + authenticate(): Boolean
+  + updatePreferences(prefs: Map): void
+  + getNotes(): List<Note>
+  + getTasks(): List<TodoItem>
+}
+
+class Note {
+  - noteId: String
+  - userId: String
+  - title: String
+  - body: String
+  - checklist: List<ChecklistItem>
+  - images: List<String>
+  - voiceRecording: String
+  - color: String
+  - category: String
+  - isPinned: Boolean
+  - createdAt: DateTime
+  - updatedAt: DateTime
+  + create(): void
+  + update(content: Map): void
+  + delete(): void
+  + addTag(tag: Tag): void
+  + removeTag(tag: Tag): void
+  + autoOrganize(): void
+  + generateTasks(): List<TodoItem>
+  + setReminder(reminder: Reminder): void
+}
+
+class TodoItem {
+  - taskId: String
+  - noteId: String
+  - title: String
+  - description: String
+  - status: TaskStatus
+  - priority: Priority
+  - dueDate: DateTime
+  - createdAt: DateTime
+  - completedAt: DateTime
+  + update(title: String, dueDate: DateTime, priority: Priority): void
+  + complete(): void
+  + updateStatus(status: TaskStatus): void
+  + setPriority(priority: Priority): void
+  + setDueDate(date: DateTime): void
+  + delete(): void
+}
+
+class Tag {
+  - tagId: String
+  - name: String
+  - color: String
+  - createdAt: DateTime
+  + attachToNote(note: Note): void
+  + detachFromNote(note: Note): void
+}
+
+class Reminder {
+  - reminderId: String
+  - entityId: String
+  - entityType: String
+  - scheduledTime: DateTime
+  - channel: NotificationChannel
+  - message: String
+  - isDelivered: Boolean
+  + schedule(): void
+  + cancel(): void
+  + reschedule(newTime: DateTime): void
+  + deliver(): void
+}
+
+class ChecklistItem {
+  - itemId: String
+  - text: String
+  - isChecked: Boolean
+  + toggle(): void
+}
+
+' Service Classes
+class AIOrganizer {
+  - modelConfig: Map
+  + analyzeContent(text: String): AnalysisResult
+  + suggestTags(note: Note): List<Tag>
+  + categorize(note: Note): Category
+}
+
+class TaskGenerator {
+  - nlpEngine: NLPEngine
+  + extractActionItems(text: String): List<ActionItem>
+  + inferDueDate(text: String): DateTime
+  + inferPriority(text: String): Priority
+  + generateTasks(note: Note): List<TodoItem>
+}
+
+class SearchService {
+  + search(query: String, filters: Map): List<Note>
+  + searchByText(query: String): List<Note>
+  + filterByTags(tags: List<Tag>): List<Note>
+  + filterByDateRange(start: DateTime, end: DateTime): List<Note>
+  + combineFilters(filters: SearchFilter): List<Note>
+}
+
+class NotificationScheduler {
+  - scheduler: JobScheduler
+  + scheduleReminder(reminder: Reminder): void
+  + cancelReminder(reminderId: String): void
+  + deliverNotification(reminder: Reminder): void
+  + checkDueTasks(): List<TodoItem>
+}
+
+' Repository Classes
+class NoteRepository {
+  - database: Database
+  + create(note: Note): Note
+  + update(note: Note): Note
+  + delete(noteId: String): Boolean
+  + findById(noteId: String): Note
+  + findByUserId(userId: String): List<Note>
+  + findByTags(tags: List<Tag>): List<Note>
+  + findExistingTags(): List<Tag>
+  + findByName(name: String): Tag
+  + addTagToNote(noteId: String, tagId: String): void
+  + search(query: SearchQuery): List<Note>
+}
+
+class TaskRepository {
+  - database: Database
+  + create(task: TodoItem): TodoItem
+  + update(task: TodoItem): TodoItem
+  + delete(taskId: String): Boolean
+  + deleteByNoteId(noteId: String): Boolean
+  + findById(taskId: String): TodoItem
+  + findByNoteId(noteId: String): List<TodoItem>
+  + findByUserId(userId: String): List<TodoItem>
+  + findByStatus(status: TaskStatus): List<TodoItem>
+}
+
+' Enums
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum NotificationChannel {
+  PUSH
+  EMAIL
+  SMS
+  IN_APP
+}
+
+' Relationships
+
+' User owns Notes and Tasks
+User "1" -- "0..*" Note : owns >
+User "1" -- "0..*" TodoItem : owns >
+
+' Note relationships
+Note "1" -- "0..*" TodoItem : generates >
+Note "0..*" -- "0..*" Tag : tagged with >
+Note "1" -- "0..*" ChecklistItem : contains >
+Note "1" -- "0..1" Reminder : has >
+
+' TodoItem relationships
+TodoItem "1" -- "0..1" Reminder : has >
+TodoItem -- TaskStatus
+TodoItem -- Priority
+
+' Reminder relationships
+Reminder -- NotificationChannel
+
+' Service dependencies
+AIOrganizer ..> Note : analyzes
+AIOrganizer ..> Tag : suggests
+AIOrganizer ..> NoteRepository : uses
+
+TaskGenerator ..> Note : extracts from
+TaskGenerator ..> TodoItem : creates
+TaskGenerator ..> TaskRepository : uses
+
+SearchService ..> NoteRepository : queries
+
+NotificationScheduler ..> Reminder : schedules
+NotificationScheduler ..> TaskRepository : monitors
+
+' Repository dependencies
+NoteRepository "1" -- "0..*" Note : manages
+NoteRepository ..> Tag : handles
+
+TaskRepository "1" -- "0..*" TodoItem : manages
+
+@enduml

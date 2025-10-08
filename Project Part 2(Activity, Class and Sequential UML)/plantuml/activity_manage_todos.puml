@@ -1,0 +1,124 @@
+@startuml Activity_Manage_ToDos
+title Activity Diagram - View & Manage To-Do List (UC5)
+
+start
+
+:User navigates to To-Do List view;
+
+partition "Load Tasks" {
+  :TaskRepository fetches user's tasks;
+
+  fork
+    :Get pending tasks;
+  fork again
+    :Get in-progress tasks;
+  fork again
+    :Get completed tasks;
+  end fork
+
+  :Sort by due date and priority;
+}
+
+:Display to-do list;
+note right
+  Shows:
+  - Task title
+  - Due date
+  - Priority
+  - Status
+  - Linked note (if any)
+end note
+
+repeat
+  :User selects an action;
+
+  if (Action type?) then (mark complete)
+    :Select task to complete;
+
+    :TodoItem updates status to COMPLETED;
+
+    :TaskRepository persists change;
+
+    if (Task has reminder?) then (yes)
+      :NotificationScheduler cancels reminder;
+    endif
+
+    :Remove from active list or move to completed section;
+
+    :Display success message;
+
+  elseif (edit task) then (edit)
+    :Select task to edit;
+
+    :Display edit form;
+
+    :User modifies details;
+    note right
+      Can change:
+      - Title
+      - Description
+      - Due date
+      - Priority
+      - Status
+    end note
+
+    :Save changes;
+
+    :TaskRepository updates task;
+
+    if (Due date changed and has reminder?) then (yes)
+      :NotificationScheduler reschedules reminder;
+    endif
+
+    :Refresh task list;
+
+  elseif (delete task) then (delete)
+    :Select task to delete;
+
+    :Show confirmation dialog;
+
+    if (Confirm deletion?) then (yes)
+      :TaskRepository deletes task;
+
+      if (Task has reminder?) then (yes)
+        :NotificationScheduler cancels reminder;
+      endif
+
+      :Remove from list;
+      :Display "Task deleted";
+    else (no)
+      :Cancel deletion;
+    endif
+
+  elseif (filter/sort) then (filter)
+    :User selects filter options;
+    note right
+      Filters:
+      - By status
+      - By priority
+      - By due date
+      - Show/hide completed
+    end note
+
+    :Apply filters;
+
+    :Refresh display with filtered results;
+
+  else (view details)
+    :Select task;
+
+    :Display full task details;
+
+    if (Task linked to note?) then (yes)
+      :Show link to source note;
+
+      :Allow navigation to note;
+    endif
+  endif
+
+repeat while (Continue managing tasks?) is (yes)
+->no;
+
+stop
+
+@enduml

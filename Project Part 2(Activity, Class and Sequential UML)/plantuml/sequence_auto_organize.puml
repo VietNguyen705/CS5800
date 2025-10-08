@@ -1,0 +1,82 @@
+@startuml Sequence_Auto_Organize
+title Sequence Diagram - Auto-Organize Note (UC3)
+
+participant Note
+participant AIOrganizer
+participant Tag
+participant NoteRepository
+
+note over Note
+  Triggered by:
+  - Note creation (UC1)
+  - Note edit (UC2)
+  - Manual request
+end note
+
+-> Note: autoOrganize()
+activate Note
+
+Note -> AIOrganizer: analyzeContent(note)
+activate AIOrganizer
+
+AIOrganizer -> AIOrganizer: Extract text from\ntitle and body
+
+AIOrganizer -> AIOrganizer: Perform NLP analysis:\n- Keyword extraction\n- Topic modeling\n- Entity recognition
+
+AIOrganizer -> AIOrganizer: Identify relevant themes
+
+AIOrganizer -> NoteRepository: findExistingTags()
+activate NoteRepository
+NoteRepository -> AIOrganizer: List<Tag>
+deactivate NoteRepository
+
+AIOrganizer -> AIOrganizer: Match themes to\nexisting tags
+
+alt Matching tags found
+  AIOrganizer -> AIOrganizer: Rank by relevance
+else No matching tags
+  AIOrganizer -> AIOrganizer: Generate new tag suggestions
+end
+
+AIOrganizer -> AIOrganizer: Select top 3-5 tags
+
+AIOrganizer -> Note: AnalysisResult\n(tags, category)
+deactivate AIOrganizer
+
+loop for each suggested tag
+  Note -> Tag: new Tag(name, color)
+  activate Tag
+
+  alt Tag already exists
+    Tag -> NoteRepository: findByName(name)
+    activate NoteRepository
+    NoteRepository -> Tag: Existing tag
+    deactivate NoteRepository
+  else New tag
+    Tag -> NoteRepository: save(tag)
+    activate NoteRepository
+    NoteRepository -> Tag: Saved tag
+    deactivate NoteRepository
+  end
+
+  Note -> Tag: attachToNote(note)
+  Tag -> NoteRepository: addTagToNote(noteId, tagId)
+  activate NoteRepository
+  NoteRepository -> Tag: Success
+  deactivate NoteRepository
+
+  Tag -> Note: Attached
+  deactivate Tag
+end
+
+Note -> Note: Set category metadata
+
+Note -> NoteRepository: update(note)
+activate NoteRepository
+NoteRepository -> Note: Updated
+deactivate NoteRepository
+
+Note --> : Organization complete
+deactivate Note
+
+@enduml

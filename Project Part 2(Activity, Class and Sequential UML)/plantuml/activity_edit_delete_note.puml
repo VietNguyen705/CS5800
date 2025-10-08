@@ -1,0 +1,73 @@
+@startuml Activity_Edit_Delete_Note
+title Activity Diagram - Edit or Delete Note (UC2)
+
+start
+
+:User navigates to note board;
+
+:Select a note to open;
+
+:Display note details;
+
+if (User wants to edit?) then (yes)
+  :Click "Edit" button;
+
+  :Modify content;
+  note right
+    Can change:
+    - Title
+    - Body text
+    - Checklist items
+    - Add/remove images
+    - Update voice notes
+  end note
+
+  :Click "Save" button;
+
+  partition "Auto-Re-organize" {
+    :AIOrganizer re-analyzes content;
+
+    if (Content changed significantly?) then (yes)
+      :Update suggested tags;
+      :Apply new tags;
+    else (no)
+      :Keep existing tags;
+    endif
+  }
+
+  :NoteRepository updates note;
+
+  :Refresh note board view;
+
+  :Display success message;
+
+else (no - delete)
+  :Click "Delete" button;
+
+  :Show confirmation dialog;
+
+  if (Confirm deletion?) then (yes)
+    if (Note has linked tasks?) then (yes)
+      :Show warning about linked tasks;
+
+      if (Proceed with deletion?) then (yes)
+        :Delete linked tasks or unlink them;
+        :NoteRepository deletes note;
+        :Remove from board view;
+        :Display "Note deleted" message;
+      else (no - cancel)
+        :Cancel deletion;
+      endif
+    else (no)
+      :NoteRepository deletes note;
+      :Remove from board view;
+      :Display "Note deleted" message;
+    endif
+  else (no - cancel)
+    :Cancel deletion;
+  endif
+endif
+
+stop
+
+@enduml

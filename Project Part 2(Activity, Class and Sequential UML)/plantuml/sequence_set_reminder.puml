@@ -1,0 +1,77 @@
+@startuml Sequence_Set_Reminder
+title Sequence Diagram - Set Reminder for Note/Task (UC8)
+
+actor User
+participant UI
+participant Note
+participant Reminder
+participant Scheduler
+
+User -> UI: Open note/task
+activate UI
+
+UI -> User: Display details
+
+User -> UI: Click "Set Reminder"
+
+UI -> User: Show reminder form
+
+User -> UI: Enter details and save
+
+UI -> Note: setReminder(time, channel)
+activate Note
+
+Note -> Reminder: create(entityId, time)
+activate Reminder
+
+Reminder -> Scheduler: schedule(reminder)
+activate Scheduler
+
+Scheduler -> Scheduler: Validate time
+
+alt Valid time
+  Scheduler -> Scheduler: Create job
+  Scheduler -> Reminder: Success
+  Reminder -> Note: Created
+  deactivate Reminder
+  Note -> UI: Success
+  deactivate Note
+  UI -> User: Reminder set
+else Invalid time
+  Scheduler -> Reminder: Error
+  Reminder -> Note: Error
+  Note -> UI: Error
+  UI -> User: Error message
+end
+
+deactivate Scheduler
+deactivate UI
+
+|||
+== Wait until scheduled time ==
+|||
+
+Scheduler -> Reminder: deliver()
+activate Scheduler
+activate Reminder
+
+Reminder -> Reminder: Mark delivered
+
+alt PUSH
+  Reminder -> Scheduler: sendPush()
+  Scheduler -> User: Push notification
+else EMAIL
+  Reminder -> Scheduler: sendEmail()
+  Scheduler -> User: Email
+else IN_APP
+  Reminder -> Scheduler: sendAlert()
+  Scheduler -> User: Alert
+end
+
+Reminder -> Scheduler: Done
+deactivate Reminder
+
+Scheduler -> Scheduler: Update status
+deactivate Scheduler
+
+@enduml

@@ -1,0 +1,101 @@
+@startuml Sequence_Edit_Delete_Note
+title Sequence Diagram - Edit or Delete Note (UC2)
+
+actor User
+participant UI
+participant Note
+participant NoteRepository
+participant AIOrganizer
+participant TaskRepository
+
+== Edit Note Flow ==
+
+User -> UI: Open note
+activate UI
+
+UI -> NoteRepository: findById(noteId)
+activate NoteRepository
+NoteRepository -> UI: Note
+deactivate NoteRepository
+
+UI -> User: Display note
+
+User -> UI: Click "Edit"
+
+UI -> User: Show edit form
+
+User -> UI: Modify content and save
+
+UI -> Note: update(content)
+activate Note
+
+Note -> Note: Update fields\n(title, body, etc.)
+
+Note -> AIOrganizer: suggestTags(note)
+activate AIOrganizer
+AIOrganizer -> AIOrganizer: Analyze updated content
+AIOrganizer -> Note: List<Tag>
+deactivate AIOrganizer
+
+Note -> Note: Update tags if changed
+
+Note -> NoteRepository: update(note)
+activate NoteRepository
+NoteRepository -> NoteRepository: Persist changes
+NoteRepository -> Note: Updated note
+deactivate NoteRepository
+
+Note -> UI: Success
+deactivate Note
+
+UI -> UI: Refresh view
+UI -> User: Show updated note
+
+deactivate UI
+
+|||
+== Delete Note Flow ==
+|||
+
+User -> UI: Open note
+activate UI
+
+UI -> User: Display note
+
+User -> UI: Click "Delete"
+
+UI -> User: Confirm deletion?
+
+User -> UI: Confirm
+
+UI -> Note: delete()
+activate Note
+
+Note -> TaskRepository: findByNoteId(noteId)
+activate TaskRepository
+TaskRepository -> Note: List<TodoItem>
+deactivate TaskRepository
+
+alt Has linked tasks
+  Note -> TaskRepository: deleteByNoteId(noteId)
+  activate TaskRepository
+  TaskRepository -> TaskRepository: Delete all linked tasks
+  TaskRepository -> Note: Deleted
+  deactivate TaskRepository
+end
+
+Note -> NoteRepository: delete(noteId)
+activate NoteRepository
+NoteRepository -> NoteRepository: Remove from database
+NoteRepository -> Note: Success
+deactivate NoteRepository
+
+Note -> UI: Deleted
+deactivate Note
+
+UI -> UI: Remove from board
+UI -> User: "Note deleted"
+
+deactivate UI
+
+@enduml

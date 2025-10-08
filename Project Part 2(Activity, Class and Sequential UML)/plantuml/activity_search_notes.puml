@@ -1,0 +1,63 @@
+@startuml Activity_Search_Notes
+title Activity Diagram - Search & Filter Notes (UC6)
+
+start
+
+:User navigates to search;
+
+:Enter search query or select filters;
+
+partition "Search Options" {
+  fork
+    :Text search (title/body);
+  fork again
+    :Filter by tags;
+  fork again
+    :Filter by date range;
+  fork again
+    :Filter by color/pin status;
+  end fork
+}
+
+:SearchService processes query;
+
+:Query NoteRepository;
+
+partition "Search Processing" {
+  if (Text query provided?) then (yes)
+    :Perform full-text search;
+  endif
+
+  if (Tag filter provided?) then (yes)
+    :Filter by tags;
+  endif
+
+  if (Date filter provided?) then (yes)
+    :Filter by date range;
+  endif
+
+  if (Status filter provided?) then (yes)
+    :Filter by pin/color/archived;
+  endif
+
+  :Combine all filters (AND logic);
+
+  :Rank results by relevance;
+}
+
+if (Results found?) then (yes)
+  :Display matching notes;
+
+  :User selects a note;
+
+  :Open note detail view;
+
+else (no)
+  :Display "No results found";
+
+  :Show search suggestions;
+endif
+
+stop
+
+@enduml

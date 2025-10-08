@@ -1,0 +1,136 @@
+@startuml Sequence_Manage_ToDos
+title Sequence Diagram - View & Manage To-Do List (UC5)
+
+actor User
+participant UI
+participant TodoItem
+participant TaskRepository
+participant NotificationScheduler
+
+== View To-Do List ==
+
+User -> UI: Navigate to To-Do List
+activate UI
+
+UI -> TaskRepository: findByUserId(userId)
+activate TaskRepository
+TaskRepository -> TaskRepository: Query tasks\n(filter by user)
+TaskRepository -> UI: List<TodoItem>
+deactivate TaskRepository
+
+UI -> UI: Sort by due date\nand priority
+
+UI -> User: Display task list
+deactivate UI
+
+|||
+== Mark Task Complete ==
+|||
+
+User -> UI: Select task and mark complete
+activate UI
+
+UI -> TodoItem: complete()
+activate TodoItem
+
+TodoItem -> TodoItem: Set status = COMPLETED\nSet completedAt = now()
+
+TodoItem -> TaskRepository: update(task)
+activate TaskRepository
+TaskRepository -> TodoItem: Success
+deactivate TaskRepository
+
+alt Task has reminder
+  TodoItem -> NotificationScheduler: cancelReminder(reminderId)
+  activate NotificationScheduler
+  NotificationScheduler -> NotificationScheduler: Remove scheduled job
+  NotificationScheduler -> TodoItem: Cancelled
+  deactivate NotificationScheduler
+end
+
+TodoItem -> UI: Updated
+deactivate TodoItem
+
+UI -> UI: Move to completed section
+UI -> User: Task marked complete
+
+deactivate UI
+
+|||
+== Edit Task ==
+|||
+
+User -> UI: Select task and click edit
+activate UI
+
+UI -> TaskRepository: findById(taskId)
+activate TaskRepository
+TaskRepository -> UI: TodoItem
+deactivate TaskRepository
+
+UI -> User: Show edit form
+
+User -> UI: Modify and save
+
+UI -> TodoItem: update(title, dueDate, priority)
+activate TodoItem
+
+TodoItem -> TodoItem: Update properties
+
+TodoItem -> TaskRepository: update(task)
+activate TaskRepository
+TaskRepository -> TodoItem: Success
+deactivate TaskRepository
+
+alt Due date changed and has reminder
+  TodoItem -> NotificationScheduler: reschedule(reminder, newDate)
+  activate NotificationScheduler
+  NotificationScheduler -> NotificationScheduler: Cancel old job\nCreate new job
+  NotificationScheduler -> TodoItem: Rescheduled
+  deactivate NotificationScheduler
+end
+
+TodoItem -> UI: Updated
+deactivate TodoItem
+
+UI -> UI: Refresh list
+UI -> User: Changes saved
+
+deactivate UI
+
+|||
+== Delete Task ==
+|||
+
+User -> UI: Select task and delete
+activate UI
+
+UI -> User: Confirm deletion?
+
+User -> UI: Confirm
+
+UI -> TodoItem: delete()
+activate TodoItem
+
+alt Has reminder
+  TodoItem -> NotificationScheduler: cancelReminder(reminderId)
+  activate NotificationScheduler
+  NotificationScheduler -> TodoItem: Cancelled
+  deactivate NotificationScheduler
+end
+
+TodoItem -> TaskRepository: delete(taskId)
+activate TaskRepository
+TaskRepository -> TaskRepository: Remove from database
+TaskRepository -> TodoItem: Deleted
+deactivate TaskRepository
+
+TodoItem -> UI: Success
+deactivate TodoItem
+
+UI -> UI: Remove from list
+UI -> User: Task deleted
+
+deactivate UI
+
+@enduml

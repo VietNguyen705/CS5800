@@ -1,0 +1,75 @@
+@startuml Sequence_Search_Notes
+title Sequence Diagram - Search & Filter Notes (UC6)
+
+actor User
+participant "UI" as UI
+participant "SearchService" as Search
+participant "NoteRepository" as NoteRepo
+participant "Note" as Note
+
+User -> UI: Navigate to search
+activate UI
+
+UI --> User: Display search interface
+
+User -> UI: Enter search query\nand/or select filters
+note right
+  Filters can include:
+  - Text query
+  - Tags
+  - Date range
+  - Color/Pin status
+end note
+
+UI -> Search: search(query, filters)
+activate Search
+
+Search -> Search: Build search criteria
+
+alt Text query provided
+  Search -> NoteRepo: searchByText(query)
+  activate NoteRepo
+  NoteRepo -> NoteRepo: Full-text search\nin title and body
+  NoteRepo --> Search: matching notes
+  deactivate NoteRepo
+end
+
+alt Tag filter provided
+  Search -> NoteRepo: filterByTags(tagIds)
+  activate NoteRepo
+  NoteRepo --> Search: notes with tags
+  deactivate NoteRepo
+end
+
+alt Date filter provided
+  Search -> NoteRepo: filterByDateRange(start, end)
+  activate NoteRepo
+  NoteRepo --> Search: notes in range
+  deactivate NoteRepo
+end
+
+Search -> Search: Combine filters (AND)\nand rank by relevance
+
+Search --> UI: List<Note> (search results)
+deactivate Search
+
+alt Results found
+  UI -> UI: Display results list
+  UI --> User: Show matching notes
+
+  User -> UI: Click on a note
+
+  UI -> Note: getNote(noteId)
+  activate Note
+  Note --> UI: Full note details
+  deactivate Note
+
+  UI --> User: Display note detail view
+
+else No results
+  UI --> User: "No results found"\nShow search suggestions
+end
+
+deactivate UI
+
+@enduml

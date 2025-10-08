@@ -1,0 +1,85 @@
+@startuml Activity_Auto_Organize
+title Activity Diagram - Auto-Organize Note (UC3)
+
+start
+
+note right
+  Triggered when:
+  - Note is created (UC1)
+  - Note is edited (UC2)
+  - User manually requests
+end note
+
+:Receive note for organization;
+
+partition "Content Analysis" {
+  :AIOrganizer receives note;
+
+  :Extract text content;
+  note right
+    Sources:
+    - Title
+    - Body text
+    - Checklist items
+  end note
+
+  fork
+    :Identify keywords;
+  fork again
+    :Analyze semantic context;
+  fork again
+    :Detect entities (dates, names, places);
+  fork again
+    :Identify topics and themes;
+  end fork
+
+  :Aggregate analysis results;
+}
+
+partition "Tag Generation" {
+  :Generate tag suggestions;
+
+  if (Matching existing tags found?) then (yes)
+    :Prioritize existing tags;
+  else (no)
+    :Create new tag suggestions;
+  endif
+
+  :Rank tags by relevance;
+
+  :Select top N tags;
+  note right
+    Limit: 3-5 tags
+    to avoid over-tagging
+  end note
+}
+
+partition "Category Assignment" {
+  :Determine primary category;
+
+  if (Work-related keywords?) then (yes)
+    :Assign "Work" category;
+  elseif (Personal keywords?) then (personal)
+    :Assign "Personal" category;
+  elseif (Shopping/todo keywords?) then (shopping)
+    :Assign "Shopping" category;
+  else (other)
+    :Assign "General" category;
+  endif
+}
+
+partition "Apply Organization" {
+  :Attach tags to note;
+
+  :Set category metadata;
+
+  :NoteRepository updates note;
+
+  :Update board view with new organization;
+}
+
+:Display organized note with tags;
+
+stop
+
+@enduml

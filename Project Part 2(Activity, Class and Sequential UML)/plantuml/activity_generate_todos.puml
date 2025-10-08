@@ -1,0 +1,58 @@
+@startuml Activity_Generate_ToDos
+title Activity Diagram - Generate To-Dos from Note (UC4)
+
+start
+
+:User opens existing note;
+
+:Click "Generate Tasks" button;
+
+partition "Task Generation" {
+  :TaskGenerator analyzes note content;
+
+  :Extract action items using NLP;
+
+  :Identify task keywords;
+  note right
+    Keywords: "need to", "must",
+    "should", "todo", "task",
+    "deadline", dates, etc.
+  end note
+
+  if (Action items found?) then (yes)
+    :Parse each action item;
+
+    fork
+      :Extract task title;
+    fork again
+      :Identify due date (if any);
+    fork again
+      :Determine priority;
+    end fork
+
+    :Create TodoItem objects;
+
+    :Link TodoItems to source Note;
+
+    :TaskRepository persists tasks;
+
+    :Update note with task links;
+
+    :Display generated tasks to user;
+
+  else (no)
+    :Show "No tasks found" message;
+  endif
+}
+
+if (User wants to edit tasks?) then (yes)
+  :Allow manual task editing;
+  :Save changes;
+else (no)
+endif
+
+:Refresh to-do list view;
+
+stop
+
+@enduml

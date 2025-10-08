@@ -1,0 +1,72 @@
+@startuml Sequence_Generate_ToDos
+title Sequence Diagram - Generate To-Dos from Note (UC4)
+
+actor User
+participant "UI" as UI
+participant "Note" as Note
+participant "TaskGenerator" as TaskGen
+participant "TodoItem" as Task
+participant "TaskRepository" as TaskRepo
+
+User -> UI: Open note
+activate UI
+UI -> Note: getNote(noteId)
+activate Note
+Note --> UI: Note details
+deactivate Note
+
+User -> UI: Click "Generate Tasks"
+
+UI -> TaskGen: generateTasks(note)
+activate TaskGen
+
+TaskGen -> TaskGen: extractActionItems(note.body)
+note right
+  NLP processing to identify:
+  - Action verbs
+  - Task keywords
+  - Due dates
+  - Priority indicators
+end note
+
+loop for each action item found
+  TaskGen -> Task: new TodoItem(title, description)
+  activate Task
+
+  Task -> Task: Set properties:\n- noteId (link to source)\n- status = PENDING
+
+  TaskGen -> TaskGen: inferDueDate(text)
+  TaskGen --> Task: dueDate
+  Task -> Task: Set dueDate
+
+  TaskGen -> TaskGen: inferPriority(text)
+  TaskGen --> Task: priority
+  Task -> Task: Set priority
+
+  Task -> TaskRepo: save(todoItem)
+  activate TaskRepo
+  TaskRepo -> TaskRepo: Persist to database
+  TaskRepo --> Task: taskId
+  deactivate TaskRepo
+
+  Task --> TaskGen: Created TodoItem
+  deactivate Task
+end
+
+TaskGen -> Note: linkTasks(taskIds)
+activate Note
+Note -> Note: Add task references
+deactivate Note
+
+TaskGen --> UI: List<TodoItem> (generated tasks)
+deactivate TaskGen
+
+UI -> UI: Display generated tasks
+UI --> User: Show task list\nwith edit options
+
+User -> UI: Review and optionally edit tasks
+UI --> User: Tasks saved and linked to note
+
+deactivate UI
+
+@enduml
